@@ -1,0 +1,111 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FileSystemApp.ViewModels"
+        xmlns:models="using:FileSystemApp.Models"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:Class="FileSystemApp.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="File System Hierarchy App">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <DockPanel Margin="10">
+        <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,10">
+            <TextBlock Text="File System Manager" FontSize="20" FontWeight="Bold"/>
+            
+            <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="4" Padding="10">
+                <Grid ColumnDefinitions="*, 150, Auto, Auto" RowDefinitions="Auto, Auto">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Name"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Size (bytes)"/>
+                    
+                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding NewItemName}" Margin="0,0,5,0"/>
+                    <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding NewFileSize}" Margin="0,0,5,0"/>
+                    <Button Grid.Row="1" Grid.Column="2" Content="Add File" Command="{Binding AddFileCommand}" Margin="0,0,5,0"/>
+                    <Button Grid.Row="1" Grid.Column="3" Content="Add Folder" Command="{Binding AddFolderCommand}"/>
+                </Grid>
+            </Border>
+
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <Button Content="← Back" Command="{Binding GoBackCommand}"/>
+                <TextBlock Text="Current Path:" VerticalAlignment="Center" FontWeight="Bold"/>
+                <TextBlock Text="{Binding CurrentFolder.Location}" VerticalAlignment="Center" Foreground="White"/>
+            </StackPanel>
+
+            <Border IsVisible="{Binding IsMoveSelectionVisible}" BorderBrush="LightGray" BorderThickness="1" CornerRadius="4" Padding="8">
+                <Grid ColumnDefinitions="Auto, *, Auto, Auto" RowDefinitions="Auto, Auto">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Move:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ItemPendingMove.Name}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                    <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                              ItemsSource="{Binding AvailableMoveTargets}"
+                              SelectedItem="{Binding SelectedMoveTarget}"
+                              MinWidth="280">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Location}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Grid.Row="1" Grid.Column="2" Content="Confirm Move" Command="{Binding ConfirmMoveCommand}" Margin="10,0,5,0"/>
+                    <Button Grid.Row="1" Grid.Column="3" Content="Cancel" Command="{Binding CancelMoveCommand}"/>
+                </Grid>
+            </Border>
+
+            <Border IsVisible="{Binding IsRenameSelectionVisible}" BorderBrush="LightGray" BorderThickness="1" CornerRadius="4" Padding="8">
+                <Grid ColumnDefinitions="Auto, *, Auto, Auto">
+                    <TextBlock Grid.Column="0" Text="Rename:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"/>
+                    <TextBox Grid.Column="1" Text="{Binding RenameItemName}" MinWidth="280"/>
+                    <Button Grid.Column="2" Content="Confirm Rename" Command="{Binding ConfirmRenameCommand}" Margin="10,0,5,0"/>
+                    <Button Grid.Column="3" Content="Cancel" Command="{Binding CancelRenameCommand}"/>
+                </Grid>
+            </Border>
+            
+            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" FontWeight="SemiBold"/>
+        </StackPanel>
+
+        <ListBox ItemsSource="{Binding CurrentItems}">
+            <ListBox.DataTemplates>
+                <DataTemplate DataType="models:FolderItem">
+                    <Grid ColumnDefinitions="50, *, 120, Auto, Auto, Auto, Auto">
+                        <TextBlock Grid.Column="0" Text="FOLDER" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="Orange"/>
+                        
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,5,0">
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Location}" FontSize="10" Foreground="Gray"/>
+                        </StackPanel>
+                        
+                        <TextBlock Grid.Column="2" Text="{Binding Size, StringFormat='\{0:N0\} bytes'}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0"/>
+                        
+                        <Button Grid.Column="3" Content="Open" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).OpenFolderCommand}" CommandParameter="{Binding}" Margin="0,0,5,0" Classes="accent"/>
+                        <Button Grid.Column="4" Content="Copy" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CopyItemCommand}" CommandParameter="{Binding}" Margin="0,0,5,0"/>
+                        <Button Grid.Column="5" Content="Move To" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).MoveItemCommand}" CommandParameter="{Binding}" Margin="0,0,5,0"/>
+                        <Button Grid.Column="6" Content="Rename" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartRenameCommand}" CommandParameter="{Binding}"/>
+                    </Grid>
+                </DataTemplate>
+
+                <DataTemplate DataType="models:FileItem">
+                    <Grid ColumnDefinitions="50, *, 120, Auto, Auto, Auto, Auto">
+                        <TextBlock Grid.Column="0" Text="FILE" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="SteelBlue"/>
+                        
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,5,0">
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Location}" FontSize="10" Foreground="Gray"/>
+                        </StackPanel>
+                        
+                        <TextBlock Grid.Column="2" Text="{Binding Size, StringFormat='\{0:N0\} bytes'}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0"/>
+                        
+                        <Rectangle Grid.Column="3" Width="50" Margin="0,0,5,0"/>
+                        
+                        <Button Grid.Column="4" Content="Copy" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CopyItemCommand}" CommandParameter="{Binding}" Margin="0,0,5,0"/>
+                        <Button Grid.Column="5" Content="Move To" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).MoveItemCommand}" CommandParameter="{Binding}" Margin="0,0,5,0"/>
+                        <Button Grid.Column="6" Content="Rename" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartRenameCommand}" CommandParameter="{Binding}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.DataTemplates>
+        </ListBox>
+    </DockPanel>
+</Window>
