@@ -11,6 +11,6 @@
   -файл. 
 Папка должна содержать список элементов файловой системы. В производных классах реализовать свойство, опр[...]
 
-<video src="untitled4.mp4" controls width="100%"></video>
+<video src="https://raw.githubusercontent.com/deart48/FileSystem/main/untitled4.mp4" controls width="100%"></video>
 
 [Смотреть видео (untitled4.mp4)](https://raw.githubusercontent.com/deart48/FileSystem/main/untitled4.mp4)
